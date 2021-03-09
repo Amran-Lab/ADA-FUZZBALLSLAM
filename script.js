@@ -4,21 +4,24 @@
 var vp_width = 920, vp_height = 690;
 var world, engine, body;
 
-var MAX_CRATES = 100;
+var MAX_CRATES = 10;
 
 
 //enable the matter engine
 engine = Matter.Engine.create();
 world = engine.world;
 body = Matter.Body;
-
+var ceiling;
+var rightwall;
+var wall;
 var ground;
 var leftwall;
 var rightwall;
 var crates = [];
 var fuzzball;
-
-
+let img;
+let crateimg;
+let fuzimg;
 
 function apply_velocity() {
 	Matter.Body.setVelocity( fuzzball.body, {x: 10, y: -5});
@@ -56,6 +59,9 @@ function get_random(min, max) {
 
 function preload() {
 	//p5 defined function
+  img = loadImage('assets/SlamBackground920x690.png');
+  crateimg = loadImage('assets/Crate120x120.png');
+  fuzimg = loadImage('assets/Fuzzball60x60.png');
 }
 
 
@@ -66,14 +72,17 @@ function setup() {
 	
 	frameRate(60);
 
-	ground = new c_ground(vp_width/2, vp_height-10, vp_width-100, 20);
+	ground = new c_ground(vp_width/2, vp_height-48, vp_width, 20);
+  wall = new c_ground(vp_width/2 - 465, vp_height/2, 20, vp_height);
+  rightwall = new c_ground(vp_width/2 + 465, vp_height/2, 20, vp_height);
+  ceiling = new c_ground(vp_width/2, 5, vp_width, 20);
 	
 	for(let i = 0; i < MAX_CRATES; i++) {
-		crates[i] = new c_crate(get_random(100, 700), get_random(0, 300), get_random(15, 25), get_random(15, 25));
+		crates[i] = new c_crate(get_random(100, 700), get_random(0, 300), 120, 120);
 	}
 
 
-	fuzzball = new c_fuzzball(get_random(100, 600), get_random(100, 300), 30);
+	fuzzball = new c_fuzzball(get_random(100, 600), 60, 60);
 
 }
 
@@ -81,6 +90,8 @@ function setup() {
 function paint_background() {
 	//access the game object for the world, use this as a background image for the game
 	background('#4c738b'); 
+  image(img,0,0,vp_width,vp_height)
+
 }
 
 
@@ -92,6 +103,9 @@ function paint_assets() {
 	}
 	
 	fuzzball.show();
+  wall.show()
+  rightwall.show()
+  ceiling.show()
 }
 
 

@@ -24,8 +24,9 @@ class c_ground {
 
 	show() {
 		const pos = this.body.position;
-		//noStroke();
+		noStroke();
 		fill('#ffffff');
+    //noFill()
 		rectMode(CENTER); //switch centre to be centre rather than left, top
 		rect(pos.x, pos.y, this.width, this.height);
 	}
@@ -60,10 +61,13 @@ class c_crate {
 		push(); //p5 translation 
 			translate(pos.x, pos.y);
 			rotate(angle);
-			//noStroke();
-			fill('#ffffff');
-			rectMode(CENTER); //switch centre to be centre rather than left, top
-			rect(0, 0, this.width, this.height);
+			noStroke();
+			//fill('#ffffff');
+      //noStroke;
+      
+      image(crateimg,-60,-60,this.width, this.height);
+			 //switch centre to be centre rather than left, top
+			//rect(0, 0, this.width, this.height);
 		pop();
 	}
 }
@@ -98,9 +102,10 @@ class c_fuzzball {
 			translate(pos.x, pos.y);
 			rotate(angle);
 			//noStroke();
-			fill('#ffffff');
-			ellipseMode(CENTER); //switch centre to be centre rather than left, top
-			circle(0, 0, this.diameter);
+			//fill('#ffffff');
+			//ellipseMode(CENTER); //switch centre to be centre rather than left, top
+      image(fuzimg,-30,-30,this.width + 50, this.height + 50);
+			//circle(0, 0, this.diameter);
 		pop();
 	}
 }
