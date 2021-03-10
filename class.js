@@ -26,7 +26,7 @@ class c_ground {
 		const pos = this.body.position;
 		noStroke();
 		fill('#ffffff');
-    //noFill()
+    noFill()
 		rectMode(CENTER); //switch centre to be centre rather than left, top
 		rect(pos.x, pos.y, this.width, this.height);
 	}
@@ -108,4 +108,68 @@ class c_fuzzball {
 			//circle(0, 0, this.diameter);
 		pop();
 	}
+}
+
+class c_launcher{
+  constructor(x, y, body) {
+//see docs on https://brm.io/matter-js/docs/classes/Constraint.html#properties
+      let options = {
+        pointA: {
+          x: x,
+          y: y
+        },
+    bodyB: body,
+    stiffness: 0.02,
+    length: 80
+    }
+//create the contraint
+  this.launch = Matter.Constraint.create(options);
+  Matter.World.add(world, this.launch); //add to the matter world
+  }
+  release() {
+  //release the constrained body by setting it to null
+  this.launch.bodyB = null;
+  }
+  show() {
+  //check to see if there is an active body
+  if(this.launch.bodyB) {
+    let posA = this.launch.pointA; //create an shortcut alias
+    let posB = this.launch.bodyB.position;
+    stroke("#00ff00"); //set a colour
+    line(posA.x, posA.y, posB.x, posB.y); //draw a line between the two points
+  }
+  }
+  
+}
+class c_launcher_body{
+  	constructor(x, y, width, height) {
+		let options = {
+			isStatic: true,
+			restitution: 0.99,
+			friction: 0.20,
+			density: 0.99,
+		}
+		this.body = Matter.Bodies.rectangle(x, y, width, height, options);
+		Matter.World.add(world, this.body);
+		//this.body.isStatic = true;
+		
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+	}
+
+	body() {
+		return this.body;
+	}
+
+	show() {
+		const pos = this.body.position;
+		noStroke();
+		fill('#ffffff');
+    noFill()
+		rectMode(CENTER); //switch centre to be centre rather than left, top
+		rect(pos.x, pos.y, this.width, this.height);
+	}
+
 }
