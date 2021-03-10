@@ -10,6 +10,8 @@ var world, engine, body;
 engine = Matter.Engine.create();
 world = engine.world;
 body = Matter.Body;
+var x,y;
+var mouselineFlag = false
 var releaseFlag = false
 var launcherimg;
 var launcherBody;
@@ -31,10 +33,10 @@ var sampleIsLooping = false;
 var crateArray = [[vp_width-60,vp_height-60],[vp_width-180,vp_height-60],[vp_width-120,vp_height-180]];
 var MAX_CRATES = crateArray.length;
 
-function apply_velocity() {
+function apply_velocity(xvel,yvel) {
   launcher.release()
   releaseFlag = true
-	Matter.Body.setVelocity( fuzzball.body, {x: 10, y: -5});
+	Matter.Body.setVelocity( fuzzball.body, {x: xvel, y: yvel});
 };
 
 
@@ -94,7 +96,7 @@ function setup() {
   ceiling = new c_ground(vp_width/2, 5, vp_width, 20);
 
 	for(let i = 0; i < MAX_CRATES; i++) {
-		crates[i] = new c_crate(crateArray[i][0], crateArray[i][1], 120, 120);
+		crates[i] = new c_crate(crateArray[i][0], crateArray[i][1], 60, 60);
 	}
 
 
@@ -130,13 +132,17 @@ function paint_assets() {
 
 
 function draw() {
-	//this p5 defined function runs every refresh cycle
+  //this p5 defined function runs every refresh cycle
 	paint_background();
 	Matter.Engine.update(engine);
 	paint_assets();
-  
-  collision()
+  fuzzBallStopped();
+  collision();
+  drawLine();
+ 
 }
+
+//Detecting collision and deleting the crate the fuzzball collided with
 function collision(){
   //return fuzzball.body.position
   for(let i = 0; i < MAX_CRATES; i++) {
@@ -151,17 +157,20 @@ function collision(){
     }
 	}
   
-  //Putting the fuzzball back into the launcher
-  if (abs(fuzzball.body.velocity.x) < 1.1 && abs(fuzzball.body.velocity.y) < 1.1 && releaseFlag==true){
+  
+}
+
+// -- Checking when the fuzzball comes to a hault, after launching it 
+// -- Resetting the fuzzball back into launcher
+function fuzzBallStopped(){
+  if (abs(fuzzball.body.velocity.x) < 0.1 && abs(fuzzball.body.velocity.y) < 0.1 && releaseFlag==true){
     console.log('stopped')
     launcher.launch.bodyB = fuzzball.body
     Matter.Body.setPosition(fuzzball.body, { x: vp_width/2 -300, y: vp_height-90})
-    
-    console.log(fuzzball.body.position)
     releaseFlag = false
   }
-  
 }
+
 
 //Start the background music when the user first clicks on the screen
 function mouseClicked(){
@@ -171,4 +180,42 @@ function mouseClicked(){
       //back.loop();
       sampleIsLooping = true;
     } 
+}
+
+  
+
+function mouseReleased() {
+  mouselineFlag=false
+  var arr = [x, y, mouseX, mouseY]
+  var widthline = mouseX - x
+  var heightline = mouseY - y
+  console.log(heightline + "h")
+  console.log(widthline + "h")
+  if (widthline ==0 && heightline ==0){ // diving by 0 bad
+    return
+  }
+  var angle = Math.atan(heightline/widthline)
+  //var theta = angle*180/ Math.PI
+  // console.log(-theta)
+  // Use length of line to determine velocity
+  var magnitude = eval(((widthline)**2+(heightline**2))**(1/2)) / 10; //its too sensitive 
+  // Restricting velocity
+  if (magnitude > 20){
+    magnitude = 20
+  }
+
+  apply_velocity(magnitude*Math.cos(angle),magnitude*Math.sin(angle))
+}
+
+//
+function drawLine(){
+  if (mouseIsPressed === true) {
+    if (mouselineFlag==false){
+        x = mouseX
+        y = mouseY
+        mouselineFlag=true
+  }
+  stroke(255)
+  line(mouseX, mouseY, x, y);
+  }
 }

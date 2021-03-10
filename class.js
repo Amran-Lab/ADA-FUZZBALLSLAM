@@ -62,10 +62,10 @@ class c_crate {
 			translate(pos.x, pos.y);
 			rotate(angle);
 			noStroke();
-			//fill('#ffffff');
+			fill('#ffffff');
       //noStroke;
       
-      image(crateimg,-60,-60,this.width, this.height);
+      image(crateimg,-this.width/2,-this.height/2,this.width, this.height);
 			 //switch centre to be centre rather than left, top
 			//rect(0, 0, this.width, this.height);
 		pop();
