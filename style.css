@@ -27,4 +27,31 @@ body {
 	top: 0px;
 }
 
+.menu{
+  float: center;
+  text-align: center;
+  padding-bottom: 5px;
+  padding-top: 5px;
+  flex: 1;
+  font-size: 40px;
+  vertical-align:top;
+  width: 300px;
+  height: 300px;
+  background-color: rgb(95, 133, 52);
+  box-shadow: 0 15px 40px -10px rgba(0, 0, 0, 0.825);
+  position:absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%)
+}
+
+button{
+  width: 200px;
+  height: 60px;
+  border: none;
+  background: #499236;
+  box-shadow: 0 15px 40px -10px rgba(0, 0, 0, 0.825);
+  font-weight: bold;
+}
+
 
