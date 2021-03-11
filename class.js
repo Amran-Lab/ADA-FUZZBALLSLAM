@@ -77,12 +77,12 @@ class c_crate {
 
 //Fuzzball class -> used to create and position a circle in the form of a crate
 class c_fuzzball {
-	constructor(x, y, diameter) {
+	constructor(x, y, diameter,img) {
 		let options = {
 			restitution: 0.90,
-			friction: 0.080,
+			friction: 0.3,
 			density: 0.95,
-			frictionAir: 0.005,
+			frictionAir: 0.02,
 		}
 		this.body = Matter.Bodies.circle(x, y, diameter/2, options); //matter.js used radius rather than diameter
 		Matter.World.add(world, this.body);
@@ -90,6 +90,7 @@ class c_fuzzball {
 		this.x = x;
 		this.y = y;
 		this.diameter = diameter;
+    this.img = img;
 	}
 
 	body() {
@@ -106,7 +107,7 @@ class c_fuzzball {
 			//noStroke();
 			//fill('#ffffff');
 			//ellipseMode(CENTER); //switch centre to be centre rather than left, top
-      image(fuzimg,-30,-30,this.width + 50, this.height + 50);
+      image(this.img,-30,-30,this.width + 50, this.height + 50);
 			//circle(0, 0, this.diameter);
 		pop();
 	}
@@ -219,8 +220,12 @@ class Present extends c_crate{
   }
 }
 
-class super_fuzz extends fuzzball{
-
+class SuperFuzz extends c_fuzzball{
+  constructor(x,y,diameter,img){
+    super(x, y, diameter,img);  
+    this.body.friction = 0.08;
+    this.body.frictionAir = 0.005;
+  }
 }
 
 //collisionfilter{

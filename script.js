@@ -34,6 +34,7 @@ var hit
 let img;
 let crateimg;
 let fuzimg;
+let superFuzzImg;
 var crateArray = [[vp_width-60,vp_height-60],[vp_width-180,vp_height-60],[vp_width-120,vp_height-180]];
 var crates = [];
 var MAX_CRATES = crateArray.length;
@@ -63,7 +64,8 @@ function preload() {
   crateimg = loadImage('assets/Crate120x120.png');
   fuzimg = loadImage('assets/Fuzzball60x60.png');
   launcherimg = loadImage('assets/Launcher146x108.png');
-  metalimg = loadImage('assets/metalbox_thumb.png')
+  metalimg = loadImage('assets/metalbox_thumb.png');
+  superFuzzImg = loadImage('assets/super_fuzz.png');
 }
 
 
@@ -88,7 +90,7 @@ function setup() {
   //I'll be back in 10 mins, the metal box works perfectly btw
   //metalbox = new MetalBox(crateArray[0][0],crateArray[0][1] - 150, 60, 60,metalimg);
 
-	fuzzball = new c_fuzzball(vp_width/2 -300,vp_height-90, 60);
+	fuzzball = new c_fuzzball(vp_width/2 -300,vp_height-90, 60,fuzimg);
   launcher = new c_launcher(vp_width/2 -300,vp_height-180,fuzzball.body);
   launcherBody = new c_launcher_body(vp_width/2 -380,vp_height-90,100, 105);
   fuzzBallsRemainingText = new Text(10,50,'Fuzz Balls - '+fuzzBallsRemaining,30);
