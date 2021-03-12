@@ -3,7 +3,7 @@
 //Screen settings
 var vp_width = 920, vp_height = 690;
 
-//Enable matter engine
+//Enable and configure the matter engine
 var world, engine, body;
 engine = Matter.Engine.create();
 world = engine.world;
@@ -31,15 +31,37 @@ var rightwall;
 var fuzzball;
 var back;
 var hit
-let img;
+let backgroundImg;
 let crateimg;
 let fuzimg;
 let superFuzzImg;
-var crateArray = [[vp_width-60,vp_height-60],[vp_width-180,vp_height-60],[vp_width-120,vp_height-180]];
 var crates = [];
-var MAX_CRATES = crateArray.length;
+var metalCrates = [];
 var fuzzBallsRemaining = 3;
 var fuzzBallsRemainingText;
+var announceScore;
+var metalArray;
+var crateArray;
+var maps;
+var presentImg;
+var present;
+var scoreText;
+var presentsArray;
+
+//Various maps with positions of crates and metal crates
+var crateArray1 = [[vp_width-30,vp_height-88],[vp_width-90,vp_height-88],[vp_width-150,vp_height-88],[vp_width-60,vp_height-148],[vp_width-120,vp_height-148],[vp_width-90,vp_height-208],[vp_width-30,vp_height-360],[vp_width-90,vp_height-360],[vp_width-60,vp_height-420]];
+var metalArray1 = [[vp_width-30,vp_height-300],[vp_width-90,vp_height-300],[vp_width-150,vp_height-300]];
+
+var crateArray2 = [[vp_width-30,vp_height-88],[vp_width-30,vp_height-148],[vp_width-150,vp_height-148],[vp_width-210,vp_height-88],[vp_width-270,vp_height-88],[vp_width-330,vp_height-88],[vp_width-90,vp_height-208]];
+var metalArray2 = [[vp_width-90,vp_height-88],[vp_width-150,vp_height-88],[vp_width-90,vp_height-148]];
+
+var crateArray3 = [[vp_width-30,vp_height-88],[vp_width-150,vp_height-88],[vp_width-90,vp_height-148],[vp_width-270,vp_height-208],[vp_width-30,vp_height-360],[vp_width-150,vp_height-360]];
+var metalArray3 = [[vp_width-90,vp_height-88],[vp_width-270,vp_height-88],[vp_width-270,vp_height-148],[vp_width-30,vp_height-300],[vp_width-90,vp_height-300],[vp_width-150,vp_height-300],[vp_width-390,vp_height-300],[vp_width-450,vp_height-300]];
+
+maps = [[crateArray1,metalArray1],[crateArray2,metalArray2],[crateArray3,metalArray3]];
+var present;
+
+var MAX_CRATES;
 
 // -- Add x and y velocity to an object using matter.js
 function apply_velocity(xvel,yvel) {
@@ -60,19 +82,25 @@ function preload() {
   soundFormats('mp3');
   hit = loadSound('assets/Hit.mp3');
   back = loadSound('assets/AmbientLoop.mp3');
-  img = loadImage('assets/SlamBackground920x690.png');
+  backgroundImg = loadImage('assets/SlamBackground920x690.png');
   crateimg = loadImage('assets/Crate120x120.png');
   fuzimg = loadImage('assets/Fuzzball60x60.png');
   launcherimg = loadImage('assets/Launcher146x108.png');
   metalimg = loadImage('assets/metalbox_thumb.png');
   superFuzzImg = loadImage('assets/super_fuzz.png');
+  presentImg   = loadImage('assets/present.png');
 }
 
 
 //Add all objects (fuzzball, launcher & crates) to the screen at the start of the game
 function setup() {
+  var randomNumber = get_random(0,maps.length);
+  
+  crateArray     = maps[randomNumber][0];
+  metalArray = maps[randomNumber][1];
   MAX_CRATES = crateArray.length;
-
+  crates = []
+  metalCrates= []
 	//this p5 defined function runs automatically once the preload function is done
 	var viewport = createCanvas(vp_width, vp_height); //set the viewport (canvas) size
 	viewport.parent("viewport_container"); //move the canvas so it’s inside the target div
@@ -81,64 +109,64 @@ function setup() {
 
 	ground = new c_ground(vp_width/2, vp_height-48, vp_width, 20);
   wall = new c_ground(vp_width/2 - 465, vp_height/2, 20, vp_height);
-  rightwall = new c_ground(vp_width/2 + 465, vp_height/2, 20, vp_height);
+  rightwall = new c_ground(vp_width/2 + 470, vp_height/2, 20, vp_height);
   ceiling = new c_ground(vp_width/2, 5, vp_width, 20);
-
+  present = new c_crate(vp_width/2,vp_height-103,49,91,presentImg);
 	for(let i = 0; i < MAX_CRATES; i++) {
 		crates[i] = new c_crate(crateArray[i][0], crateArray[i][1], 60, 60,crateimg);
 	}
-  //I'll be back in 10 mins, the metal box works perfectly btw
-  //metalbox = new MetalBox(crateArray[0][0],crateArray[0][1] - 150, 60, 60,metalimg);
 
-	fuzzball = new c_fuzzball(vp_width/2 -300,vp_height-90, 60,fuzimg);
+  for (let i = 0; i < metalArray.length; i++) {
+      metalCrates[i] = new c_crate(metalArray[i][0],metalArray[i][1], 60, 60,metalimg);
+      metalCrates[i].makeStatic();
+  }
+	fuzzball = new c_fuzzball(vp_width/2 -300,vp_height-90, 60,fuzimg,superFuzzImg);
   launcher = new c_launcher(vp_width/2 -300,vp_height-180,fuzzball.body);
-  launcherBody = new c_launcher_body(vp_width/2 -380,vp_height-90,100, 105);
+  launcherBody = new c_ground(vp_width/2 -380,vp_height-90,100, 105);
   fuzzBallsRemainingText = new Text(10,50,'Fuzz Balls - '+fuzzBallsRemaining,30);
+  scoreText              = new Text(vp_width/2+300,50,'Score - ',30);
+  announceScore = new AnnounceScore('',60);
+
 }
 
 
 //Setting up the background image for the game
 function paint_background() {
-	background('#4c738b'); 
-  image(img,0,0,vp_width,vp_height);
+  image(backgroundImg,0,0,vp_width,vp_height);
+  image(launcherimg, vp_width/2 -450,vp_height-150,146, 108);
   fuzzBallsRemainingText.show();
 }
-
 
 //Showing / updating all the objects (crates, fuzzball, etc.)
 function paint_assets() {
 	for(let i = 0; i < MAX_CRATES; i++) {
 		crates[i].show();
 	}
-	ground.show(); 
-  wall.show();
-  rightwall.show();
-  ceiling.show();
-  image(launcherimg, vp_width/2 -450,vp_height-150,146, 108);
-  launcherBody.show();
+  for(let i = 0; i < metalCrates.length; i++) {
+		metalCrates[i].show()
+	}
 	fuzzball.show();
-  //metalbox.show();
-     
+  fuzzBallStopped();
+  collision();
+  drawLine();
+  showFuzzBalls();
+  updateScore();  
+  present.show();
+  checkCrates();
 }
 
-
+//This P5 defined function runs every refresh cycle
 function draw() {
-  //this p5 defined function runs every refresh cycle
   let menu = document.getElementById('menu');
-	
+  //Check if the game is running or paused.
   if(startflag === false){
     paint_background();
     menu.style = 'display:block;';
   }else{
-    menu.style = 'display:none;';
-    paint_background();
     Matter.Engine.update(engine);
+    menu.style = 'display:none;'; 
+    paint_background();
     paint_assets();
-    fuzzBallStopped();
-    collision();
-    drawLine();
-    checkFuzzBalls();  
-    checkCrates();
   }
 }
 
@@ -146,29 +174,34 @@ function draw() {
 function collision(){
   //return fuzzball.body.position
   for(let i = 0; i < MAX_CRATES; i++) {
-		//crates[i].show();
-    //var fuzz = fuzzball.body()
     if (Matter.SAT.collides(fuzzball.body, crates[i].body).collided){
-      console.log(i + "- fuzzball")    
-      hit.play()  
-      Matter.World.remove(world, crates[i].body)
+      hit.play() ; 
+      crates[i].remove()
       crates.splice(i,1)
-      MAX_CRATES = MAX_CRATES - 1; 
+      MAX_CRATES = MAX_CRATES - 1;
+      //Announcing score
+      announceScore.text = 10;   
+      announceScore.show();
     }
 	}
+  //Checking if the fuzzball collides with the present 
+  if (Matter.SAT.collides(fuzzball.body, present.body).collided){
+      hit.play();  
+      present.remove();
+	    fuzzball.superFuzz();
+  }
 }
 
 // -- Checking when the fuzzball comes to a hault, after launching it 
 // -- Resetting the fuzzball back into launcher
 function fuzzBallStopped(){
   if (abs(fuzzball.body.velocity.x) < 0.1 && abs(fuzzball.body.velocity.y) < 0.1 && releaseFlag==true){
-    console.log('stopped')
     launcher.launch.bodyB = fuzzball.body //unrelease
-    Matter.Body.setPosition(fuzzball.body, { x: vp_width/2 -300, y: vp_height-90}) //resets position
+    Matter.Body.setPosition(fuzzball.body, { x: vp_width/2 -300, y: vp_height-90}) 
     releaseFlag = false;
-    //Updating the number of Fuzzballs remaining
+    //If fuzzBalls left is 0, bring the menu up
     if (fuzzBallsRemaining ==0){
-      fuzzBallsRemaining -= 1;
+      startflag = false;
     }
   }
 }
@@ -183,16 +216,16 @@ function mouseClicked(){
     } 
 }
 
-
 function mouseReleased() {
     //Making sure that the player is only allowed to aim once per fuzzBall
     //Making sure the function doesn't interrupt with menu clicks
     if(releaseFlag === true || startflag == false){
       return;
     }
-    
-    mouselineFlag=false;  //resets mouslineflag
-    //console.log(arr)
+
+    //Resets mouslineflag
+    mouselineFlag=false;  
+
     var arr = [x, y, mouseX, mouseY];
     var widthline = mouseX - x;
     var heightline = mouseY - y;
@@ -202,8 +235,7 @@ function mouseReleased() {
       return
     }
     var angle = Math.atan(heightline/widthline)
-    //var theta = angle*180/ Math.PI
-    // console.log(-theta)
+ 
     // Use length of line to determine velocity
     var magnitude = eval(((widthline)**2+(heightline**2))**(1/2)) / 10; 
     // Restricting velocity
@@ -223,32 +255,30 @@ function drawLine(){
   }
   if (mouseIsPressed === true) {
     if (mouselineFlag==false){
-        x = mouseX
-        y = mouseY
-        mouselineFlag=true
-  }
+        x = mouseX;
+        y = mouseY;
+        mouselineFlag=true;
+    }
     stroke(255);
     strokeWeight(1);
     line(mouseX, mouseY, x, y);
   }
 }
 
-// -- Check if the player has ran out of fuzzBalls
-// -- Update how many fuzzballs are remaining
-function checkFuzzBalls(){
+//Updates lays current score
+function updateScore(txtPreset='Score : '){
   //Constantly updating the score and keeping track
   let score = document.getElementById('score');
   let totalScore  = (crateArray.length - crates.length)*10;
-  score.innerText = "Score : "+totalScore;
-  // The text is updated if fuzzballs remaining = 0
-  if(fuzzBallsRemaining < 0){
-    startflag = false;
-    //Updating the fuzzBallsRemainingText to 0
-    fuzzBallsRemainingText.text = 'Fuzz Balls - 0'
-    fuzzBallsRemainingText.show();
-    return;
-  }
-  //Updating fuzzBallsRemaining text
+  score.innerText = txtPreset + totalScore;
+  //Updating the score shown on the screen.
+  scoreText.text  = txtPreset + totalScore;
+  scoreText.show();
+  return totalScore;
+}
+
+// Update the text (label/widget) with how many fuzzballs are remaining
+function showFuzzBalls(){ 
   fuzzBallsRemainingText.text = 'Fuzz Balls - ' + fuzzBallsRemaining;
   fuzzBallsRemainingText.show();
 }
@@ -259,19 +289,17 @@ function checkCrates(){
       fuzzBallsRemainingText.text = 'Fuzz Balls - 0';
       fuzzBallsRemainingText.show();
       startflag = false;
-      let score = document.getElementById('score');
-      let totalScore  = (fuzzBallsRemaining  + crateArray.length) * 10;
-      score.innerText = "Congrats! You Win !!! \n Score : " + totalScore;
+      updateScore("Congrats! You Win !!! \n Score : ");
   }
 }
 
-//Function is triggered when an user clicks on the menu-> start option
-function start(){
+//Function is triggered when an user clicks on the menu -> start option
+function start(){ 
   startflag = true;
   Matter.World.clear(world);
   Matter.Engine.clear(engine);
   setup();
-  fuzzBallsRemaining = 3;
+  fuzzBallsRemaining = 3; 
 }
 
 //Close the menu down

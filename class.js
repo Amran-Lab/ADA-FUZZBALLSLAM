@@ -1,6 +1,5 @@
 "use strict";
 
-
 //Ground class -> used to create and position a rectangle in the form of the ground
 class c_ground {
 	constructor(x, y, width, height) {
@@ -12,8 +11,7 @@ class c_ground {
 		}
 		this.body = Matter.Bodies.rectangle(x, y, width, height, options);
 		Matter.World.add(world, this.body);
-		//this.body.isStatic = true;
-		
+	
 		this.x = x;
 		this.y = y;
 		this.width = width;
@@ -23,16 +21,8 @@ class c_ground {
 	body() {
 		return this.body;
 	}
-
-	show() {
-		const pos = this.body.position;
-		noStroke();
-		fill('#ffffff');
-    noFill()
-		rectMode(CENTER); //switch centre to be centre rather than left, top
-		rect(pos.x, pos.y, this.width, this.height);
-	}
 }
+
 
 
 //Crate class -> used to create and position a rectangle in the form of a crate
@@ -51,46 +41,56 @@ class c_crate {
 		this.y = y;
 		this.width = width;
 		this.height = height;
+    this.enabledflag = true;
 	}
-
+  remove(){
+    Matter.World.remove(world,this.body);
+    this.enabledflag = false;
+  }
 	body() {
 		return this.body;
 	}
 
+  makeStatic(){
+    this.body.isStatic = true;
+  }
+
 	show() {
 		const pos = this.body.position;
 		const angle = this.body.angle;
+    if (this.enabledflag == false){
 
-		push(); //p5 translation 
-			translate(pos.x, pos.y);
-			rotate(angle);
-			noStroke();
-		  fill('#ffffff');
-      //noStroke;
-      
-      image(this.img,-this.width/2,-this.height/2,this.width, this.height);
-			 //switch centre to be centre rather than left, top
-			//rect(0, 0, this.width, this.height);
-		pop();
+    }
+    else{
+      push(); //p5 translation 
+        translate(pos.x, pos.y);
+        rotate(angle);
+        noStroke();
+        fill('#ffffff');
+        image(this.img,-this.width/2,-this.height/2,this.width, this.height);
+      pop();
+    }
 	}
 }
 
 //Fuzzball class -> used to create and position a circle in the form of a crate
 class c_fuzzball {
-	constructor(x, y, diameter,img) {
+	constructor(x, y, diameter,fuzzBallImg,superFuzzImg) {
 		let options = {
 			restitution: 0.90,
 			friction: 0.3,
 			density: 0.95,
-			frictionAir: 0.02,
+			frictionAir: 0.01,
 		}
 		this.body = Matter.Bodies.circle(x, y, diameter/2, options); //matter.js used radius rather than diameter
 		Matter.World.add(world, this.body);
 		
 		this.x = x;
 		this.y = y;
-		this.diameter = diameter;
-    this.img = img;
+		this.diameter     = diameter;
+    this.fuzzBallImg  = fuzzBallImg;
+    this.superFuzzImg = superFuzzImg; 
+    this.currentImg   = this.fuzzBallImg;
 	}
 
 	body() {
@@ -104,19 +104,26 @@ class c_fuzzball {
 		push(); //p5 translation 
 			translate(pos.x, pos.y);
 			rotate(angle);
-			//noStroke();
-			//fill('#ffffff');
-			//ellipseMode(CENTER); //switch centre to be centre rather than left, top
-      image(this.img,-30,-30,this.width + 50, this.height + 50);
-			//circle(0, 0, this.diameter);
+      image(this.currentImg,-30,-30,this.width + 50, this.height + 50);
 		pop();
 	}
+
+  superFuzz(){
+      this.body.friction    = 0.1;
+      this.body.frictionAir = 0.005;
+      this.currentImg       = this.superFuzzImg;
+  }
+
+  normalFuzz(){
+      this.body.friction    = 0.3;
+      this.body.frictionAir = 0.01;
+      this.currentImg       = this.fuzzBallImg;
+  }
 }
 
 //Launcher class -> used to create and position a circle in the form of a crate
 class c_launcher{
   constructor(x, y, body) {
-//see docs on https://brm.io/matter-js/docs/classes/Constraint.html#properties
   let options = {
     pointA: {
         x: x,
@@ -145,38 +152,6 @@ class c_launcher{
   } 
 }
 
-class c_launcher_body{
-  	constructor(x, y, width, height) {
-		let options = {
-			isStatic: true,
-			restitution: 0.99,
-			friction: 0.20,
-			density: 0.99,
-		}
-		this.body = Matter.Bodies.rectangle(x, y, width, height, options);
-		Matter.World.add(world, this.body);
-		//this.body.isStatic = true;
-		
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
-	}
-
-	body() {
-		return this.body;
-	}
-
-	show() {
-		const pos = this.body.position;
-		noStroke();
-		fill('#ffffff');
-    noFill()
-		rectMode(CENTER); //switch centre to be centre rather than left, top
-		rect(pos.x, pos.y, this.width, this.height);
-	}
-
-}
 
 //Add text to the screen
 class Text{
@@ -192,42 +167,24 @@ class Text{
       //Avoiding the white stroke from the aim_line to affect the text
       strokeWeight(0);
       stroke(0);
+      //Configuring the text and adding it to the screen
       textSize(this.size);
       text(this.text,this.x,this.y); 
   }
 }
 
-//Menu class - show menu when needed
-class Menu{
-  constructor(name){
-    this.name = name;
+//Class that will allow score to be announced
+class AnnounceScore{
+  constructor(text,size){
+    this.text           = text;
+    this.size           = size;
+    this.scoreContainer = document.getElementById('score-announcement-container');
   }
   show(){
-    
+    this.h3             = document.createElement('h3');
+    this.h3.className   = 'score-announcement';
+    this.scoreContainer.appendChild(this.h3); 
+    this.h3.style     = 'font-size:'+this.size+'px;display:block;animation:score-announcement-animation;animation-duration:0.4s;';
+    this.h3.innerText = '+'+this.text;
   }
 }
-
-class MetalBox extends c_crate{
-  	constructor(x, y, width, height,img) {
-      super(x,y,width,height,img);
-      this.body.isStatic = true;
-    }
-}
-
-class Present extends c_crate{
-  constructor(x,y,width,height,img){
-    super(x,y,width,height,img);
-  }
-}
-
-class SuperFuzz extends c_fuzzball{
-  constructor(x,y,diameter,img){
-    super(x, y, diameter,img);  
-    this.body.friction = 0.08;
-    this.body.frictionAir = 0.005;
-  }
-}
-
-//collisionfilter{
-//mask and category
-//}
