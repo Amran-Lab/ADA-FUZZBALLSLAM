@@ -1,4 +1,7 @@
 "use strict";
+// **** To Do's ****
+// Rename CrateArray => CrateArrangements
+// Move the present
 
 //Screen settings
 var vp_width = 920, vp_height = 690;
@@ -17,7 +20,7 @@ var x,y;
 var mouselineFlag = false;
 var releaseFlag = false;
 var sampleIsLooping = false;
-var startflag = false;
+var menuFlag = false;
 var launcherimg;
 var customFont
 var launcherBody;
@@ -47,6 +50,19 @@ var presentImg;
 var present;
 var scoreText;
 var presentsArray;
+var randomNumber;
+var groundOptions = { 
+			isStatic: true,
+			restitution: 0.99,
+			friction: 0.20,
+			density: 0.99,
+}
+var crateOptions = {
+ 			restitution: 0.99,
+ 			friction: 0.030,
+ 			density: 0.99,
+ 			frictionAir: 0.032,
+}
 
 //Various maps with positions of crates and metal crates
 var crateArray1 = [[vp_width-30,vp_height-88],[vp_width-90,vp_height-88],[vp_width-150,vp_height-88],[vp_width-60,vp_height-148],[vp_width-120,vp_height-148],[vp_width-90,vp_height-208],[vp_width-30,vp_height-360],[vp_width-90,vp_height-360],[vp_width-60,vp_height-420]];
@@ -93,9 +109,13 @@ function preload() {
 
 
 //Add all objects (fuzzball, launcher & crates) to the screen at the start of the game
-function setup() {
-  var randomNumber = get_random(0,maps.length);
+function setup(isRestart = false) {
+    
+  Matter.World.clear(world);
+  Matter.Engine.clear(engine);
   
+  if (isRestart  === false){randomNumber = get_random(0,maps.length)};
+
   crateArray     = maps[randomNumber][0];
   metalArray = maps[randomNumber][1];
   MAX_CRATES = crateArray.length;
@@ -107,22 +127,22 @@ function setup() {
 	
 	frameRate(60);
 
-	ground = new c_ground(vp_width/2, vp_height-48, vp_width, 20);
-  wall = new c_ground(vp_width/2 - 465, vp_height/2, 20, vp_height);
-  rightwall = new c_ground(vp_width/2 + 470, vp_height/2, 20, vp_height);
-  ceiling = new c_ground(vp_width/2, 5, vp_width, 20);
-  present = new c_crate(vp_width/2,vp_height-103,49,91,presentImg);
+	ground = new c_ground(vp_width/2, vp_height-48, vp_width, 20,groundOptions);
+  wall = new c_ground(vp_width/2 - 465, vp_height/2, 20, vp_height,groundOptions);
+  rightwall = new c_ground(vp_width/2 + 470, vp_height/2, 20, vp_height,groundOptions);
+  ceiling = new c_ground(vp_width/2, 5, vp_width, 20,groundOptions);
+  present = new c_crate(vp_width/2,vp_height-103,49,91,presentImg,crateOptions);
 	for(let i = 0; i < MAX_CRATES; i++) {
-		crates[i] = new c_crate(crateArray[i][0], crateArray[i][1], 60, 60,crateimg);
+		crates[i] = new c_crate(crateArray[i][0], crateArray[i][1], 60, 60,crateimg,crateOptions);
 	}
 
   for (let i = 0; i < metalArray.length; i++) {
-      metalCrates[i] = new c_crate(metalArray[i][0],metalArray[i][1], 60, 60,metalimg);
+      metalCrates[i] = new c_crate(metalArray[i][0],metalArray[i][1], 60, 60,metalimg,crateOptions);
       metalCrates[i].makeStatic();
   }
 	fuzzball = new c_fuzzball(vp_width/2 -300,vp_height-90, 60,fuzimg,superFuzzImg);
   launcher = new c_launcher(vp_width/2 -300,vp_height-180,fuzzball.body);
-  launcherBody = new c_ground(vp_width/2 -380,vp_height-90,100, 105);
+  launcherBody = new c_ground(vp_width/2 -380,vp_height-90,100, 105,groundOptions);
   fuzzBallsRemainingText = new Text(10,50,'Fuzz Balls - '+fuzzBallsRemaining,30);
   scoreText              = new Text(vp_width/2+300,50,'Score - ',30);
   announceScore = new AnnounceScore('',60);
@@ -159,7 +179,7 @@ function paint_assets() {
 function draw() {
   let menu = document.getElementById('menu');
   //Check if the game is running or paused.
-  if(startflag === false){
+  if(menuFlag === false){
     paint_background();
     menu.style = 'display:block;';
   }else{
@@ -201,7 +221,7 @@ function fuzzBallStopped(){
     releaseFlag = false;
     //If fuzzBalls left is 0, bring the menu up
     if (fuzzBallsRemaining ==0){
-      startflag = false;
+      menuFlag = false;
     }
   }
 }
@@ -219,7 +239,7 @@ function mouseClicked(){
 function mouseReleased() {
     //Making sure that the player is only allowed to aim once per fuzzBall
     //Making sure the function doesn't interrupt with menu clicks
-    if(releaseFlag === true || startflag == false){
+    if(releaseFlag === true || menuFlag == false){
       return;
     }
 
@@ -288,28 +308,37 @@ function checkCrates(){
   if(crates.length == 0){
       fuzzBallsRemainingText.text = 'Fuzz Balls - 0';
       fuzzBallsRemainingText.show();
-      startflag = false;
+      menuFlag = false;
       updateScore("Congrats! You Win !!! \n Score : ");
   }
 }
 
 //Function is triggered when an user clicks on the menu -> start option
 function start(){ 
-  startflag = true;
-  Matter.World.clear(world);
-  Matter.Engine.clear(engine);
+  menuFlag = true;
   setup();
+  fuzzBallsRemaining = 3; 
+}
+
+
+function restart(){ 
+  menuFlag = true;
+  let restart = true;
+  setup(restart);
   fuzzBallsRemaining = 3; 
 }
 
 //Close the menu down
 function closeMenu(){
-  startflag = true;
+  if(fuzzBallsRemaining === 0 || crates.length === 0){
+    return;
+  }
+  menuFlag = true;
 }
 
 //Check if the 'P' key is pressed
 function keyPressed() {
   if (keyCode === 80) {
-    startflag = false
-   } // prevent default
+    menuFlag = false
+   } 
 }

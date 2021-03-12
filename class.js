@@ -2,13 +2,8 @@
 
 //Ground class -> used to create and position a rectangle in the form of the ground
 class c_ground {
-	constructor(x, y, width, height) {
-		let options = {
-			isStatic: true,
-			restitution: 0.99,
-			friction: 0.20,
-			density: 0.99,
-		}
+	constructor(x, y, width, height,options) {
+		this.options = options;
 		this.body = Matter.Bodies.rectangle(x, y, width, height, options);
 		Matter.World.add(world, this.body);
 	
@@ -23,46 +18,26 @@ class c_ground {
 	}
 }
 
-
-
-//Crate class -> used to create and position a rectangle in the form of a crate
-class c_crate {
-	constructor(x, y, width, height,img) {
-		let options = {
-			restitution: 0.99,
-			friction: 0.030,
-			density: 0.99,
-			frictionAir: 0.032,
-		}
-		this.body = Matter.Bodies.rectangle(x, y, width, height, options);
-		Matter.World.add(world, this.body);
-		this.img = img;
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
+class c_crate extends c_ground{
+  constructor(x,y,width,height,img,options){
+    super(x,y,width,height,options)
     this.enabledflag = true;
-	}
+    this.img         = img;
+  }
   remove(){
     Matter.World.remove(world,this.body);
     this.enabledflag = false;
   }
-	body() {
-		return this.body;
-	}
-
   makeStatic(){
     this.body.isStatic = true;
   }
-
 	show() {
 		const pos = this.body.position;
 		const angle = this.body.angle;
     if (this.enabledflag == false){
-
     }
     else{
-      push(); //p5 translation 
+      push(); 
         translate(pos.x, pos.y);
         rotate(angle);
         noStroke();
@@ -73,7 +48,7 @@ class c_crate {
 	}
 }
 
-//Fuzzball class -> used to create and position a circle in the form of a crate
+//Fuzzball class -> used to create and position a circle in the form of a fuzzball
 class c_fuzzball {
 	constructor(x, y, diameter,fuzzBallImg,superFuzzImg) {
 		let options = {
@@ -120,6 +95,7 @@ class c_fuzzball {
       this.currentImg       = this.fuzzBallImg;
   }
 }
+
 
 //Launcher class -> used to create and position a circle in the form of a crate
 class c_launcher{
