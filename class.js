@@ -18,6 +18,7 @@ class c_ground {
 	}
 }
 
+//Uses properties and methods from c_ground and adds more to it to make it a crate
 class c_crate extends c_ground{
   constructor(x,y,width,height,img,options){
     super(x,y,width,height,options)
@@ -25,12 +26,13 @@ class c_crate extends c_ground{
     this.img         = img;
   }
   remove(){
-    Matter.World.remove(world,this.body);
-    this.enabledflag = false;
+    Matter.World.remove(world,this.body); // Removes obj from engine / world
+    this.enabledflag = false;             // Stops it from being shown / displayed
   }
   makeStatic(){
-    this.body.isStatic = true;
+    this.body.isStatic = true;           //Sets the physics property for metal crates
   }
+  //Grabs the position and angle of the body from matter and updates it on the canvas using P5.js
 	show() {
 		const pos = this.body.position;
 		const angle = this.body.angle;
@@ -83,21 +85,16 @@ class c_fuzzball {
 		pop();
 	}
 
+  //Changes the properties of the object in matter.js
   superFuzz(){
       this.body.friction    = 0.1;
       this.body.frictionAir = 0.005;
-      this.currentImg       = this.superFuzzImg;
-  }
-
-  normalFuzz(){
-      this.body.friction    = 0.3;
-      this.body.frictionAir = 0.01;
-      this.currentImg       = this.fuzzBallImg;
+      this.currentImg       = this.superFuzzImg; // Changes the image of the fuzzball
   }
 }
 
 
-//Launcher class -> used to create and position a circle in the form of a crate
+//Launcher class contraints fuzzball to launcher until the release method is executed
 class c_launcher{
   constructor(x, y, body) {
   let options = {
@@ -117,17 +114,8 @@ class c_launcher{
     //release the constrained body by setting it to null
     this.launch.bodyB = null;
   }
-  show() {
-    //check to see if there is an active body
-    if(this.launch.bodyB) {
-      let posA = this.launch.pointA; //create an shortcut alias
-      let posB = this.launch.bodyB.position;
-      stroke("#00ff00"); //set a colour
-      line(posA.x, posA.y, posB.x, posB.y); //draw a line between the two points
-    }
-  } 
-}
 
+}
 
 //Add text to the screen
 class Text{
@@ -137,7 +125,8 @@ class Text{
     this.text = text;
     this.size = size;
   }
-  	
+  
+  //Displays text on canvas at given position and size
   show(){
       fill(50);
       //Avoiding the white stroke from the aim_line to affect the text
@@ -156,6 +145,7 @@ class AnnounceScore{
     this.size           = size;
     this.scoreContainer = document.getElementById('score-announcement-container');
   }
+  //Creates a popup with a score announcement that disappears after a fixed amount of time
   show(){
     this.h3             = document.createElement('h3');
     this.h3.className   = 'score-announcement';
