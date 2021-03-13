@@ -72,14 +72,14 @@ function get_random(min, max) {
 
 // -- Load all game assets using p5 pre-defined function (preload)
 function preload() {
-  hitSound = loadSound('assets/Hit.mp3');
-  backgroundImg = loadImage('assets/SlamBackground920x690.png');
-  crateimg = loadImage('assets/Crate120x120.png');
-  fuzimg = loadImage('assets/Fuzzball60x60.png');
-  launcherimg = loadImage('assets/Launcher146x108.png');
-  metalimg = loadImage('assets/metalbox_thumb.png');
-  superFuzzImg = loadImage('assets/super_fuzz.png');
-  presentImg   = loadImage('assets/present.png');
+  hitSound = loadSound('https://public-assets-fuzzballslam.s3.eu-west-2.amazonaws.com/assets/Hit.mp3');
+  backgroundImg = loadImage('https://public-assets-fuzzballslam.s3.eu-west-2.amazonaws.com/assets/SlamBackground920x690.png');
+  crateimg = loadImage('https://public-assets-fuzzballslam.s3.eu-west-2.amazonaws.com/assets/Crate120x120.png');
+  fuzimg = loadImage('https://public-assets-fuzzballslam.s3.eu-west-2.amazonaws.com/assets/Fuzzball60x60.png');
+  launcherimg = loadImage('https://public-assets-fuzzballslam.s3.eu-west-2.amazonaws.com/assets/Launcher146x108.png');
+  metalimg = loadImage('https://public-assets-fuzzballslam.s3.eu-west-2.amazonaws.com/assets/metalbox_thumb.png');
+  superFuzzImg = loadImage('https://public-assets-fuzzballslam.s3.eu-west-2.amazonaws.com/assets/super_fuzz.png');
+  presentImg   = loadImage('https://public-assets-fuzzballslam.s3.eu-west-2.amazonaws.com/assets/present.png');
 }
 
 
